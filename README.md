@@ -535,7 +535,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 <!-- TODO: Add your contact information -->
 - **GitHub**: [@arpm511](https://github.com/arpm511)
-- **Email**: your.email@example.com
+- **Email**: arpm511@gmail.com
 
 ---
 
