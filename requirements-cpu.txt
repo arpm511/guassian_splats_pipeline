@@ -1,0 +1,19 @@
+# Python dependencies for Gaussian Splatting pipeline (CPU-only)
+numpy>=1.23.0
+opencv-python>=4.8.0
+pillow>=10.0.0
+tqdm>=4.65.0
+plyfile>=0.8.1
+matplotlib>=3.7.0
+
+# For COLMAP interface
+pycolmap>=0.4.0
+
+# Note: PyTorch CPU version is installed separately in Dockerfile
+# torch>=2.0.0+cpu
+# torchvision>=0.15.0+cpu
+
+# Utilities
+pyyaml>=6.0
+argparse
+pathlib

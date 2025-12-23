@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  gaussian-splatting:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gaussian-splatting:latest
+    container_name: gaussian-splat-env
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics
+    volumes:
+      - ./data:/workspace/project/data
+      - ./scripts:/workspace/project/scripts
+      - ./example:/workspace/project/example
+      - ./data/output:/workspace/project/output
+    working_dir: /workspace/project
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: /bin/bash

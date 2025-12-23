@@ -1,0 +1,75 @@
+# Gaussian Splatting Environment Dockerfile (CPU-Only)
+# For systems without NVIDIA GPU
+FROM ubuntu:22.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    cmake \
+    build-essential \
+    libboost-program-options-dev \
+    libboost-filesystem-dev \
+    libboost-graph-dev \
+    libboost-system-dev \
+    libeigen3-dev \
+    libflann-dev \
+    libfreeimage-dev \
+    libmetis-dev \
+    libgoogle-glog-dev \
+    libgtest-dev \
+    libsqlite3-dev \
+    libglew-dev \
+    qtbase5-dev \
+    libqt5opengl5-dev \
+    libcgal-dev \
+    libceres-dev \
+    python3.10 \
+    python3-pip \
+    python3-dev \
+    ffmpeg \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install COLMAP (CPU-only build)
+RUN git clone https://github.com/colmap/colmap.git /tmp/colmap && \
+    cd /tmp/colmap && \
+    mkdir build && cd build && \
+    cmake .. -DCUDA_ENABLED=OFF && \
+    make -j$(nproc) && \
+    make install && \
+    rm -rf /tmp/colmap
+
+# Install GLOMAP (CPU-only build)
+RUN git clone https://github.com/colmap/glomap.git /tmp/glomap && \
+    cd /tmp/glomap && \
+    mkdir build && cd build && \
+    cmake .. -DCUDA_ENABLED=OFF && \
+    make -j$(nproc) && \
+    make install && \
+    rm -rf /tmp/glomap
+
+# Set up Python environment
+WORKDIR /workspace
+COPY requirements-cpu.txt .
+RUN pip3 install --no-cache-dir -r requirements-cpu.txt
+
+# Install PyTorch (CPU version)
+RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# Clone and setup Gaussian Splatting repository
+RUN git clone https://github.com/graphdeco-inria/gaussian-splatting /workspace/gaussian-splatting --recursive
+
+# Install Gaussian Splatting dependencies
+WORKDIR /workspace/gaussian-splatting
+RUN pip3 install -r requirements.txt
+
+# Set working directory back to main workspace
+WORKDIR /workspace/project
+
+# Expose port for viewers if needed
+EXPOSE 6006
+
+CMD ["/bin/bash"]

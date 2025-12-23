@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  gaussian-splatting-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+    image: gaussian-splatting-cpu:latest
+    container_name: gaussian-splat-env-cpu
+    volumes:
+      - ./data:/workspace/project/data
+      - ./scripts:/workspace/project/scripts
+      - ./example:/workspace/project/example
+      - ./data/output:/workspace/project/output
+    working_dir: /workspace/project
+    stdin_open: true
+    tty: true
+    command: /bin/bash
