@@ -4,9 +4,6 @@
 
 A complete educational resource for creating 3D Gaussian Splats from video footage and visualizing them in Blender. This repository provides **two clear workflow paths** to accommodate different skill levels and use cases, making it easy for students and researchers to get started with Gaussian Splatting.
 
-![Pipeline Overview](docs/images/pipeline_overview.png)
-<!-- TODO: Add pipeline overview diagram -->
-
 ## Overview
 
 This repository helps you create photorealistic 3D Gaussian Splats from video or images through **two workflow approaches**:
