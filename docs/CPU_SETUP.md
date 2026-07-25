@@ -2,7 +2,7 @@
 
 This guide is for users who don't have an NVIDIA GPU or want to run the pipeline on CPU only.
 
-## ⚠️ Important Notes
+## Important Notes
 
 - **Performance**: CPU processing is significantly slower than GPU processing
   - Frame extraction: Similar speed
@@ -228,9 +228,9 @@ python train_gaussian_splat.py --source_path colmap --iterations 30000
 
 ## Summary
 
-- ✅ **Frame extraction**: Works great on CPU
-- ✅ **COLMAP/GLOMAP**: Works on CPU but slower (still reasonable)
-- ❌ **Gaussian Splatting training**: Not recommended on CPU (too slow)
-- 💡 **Best approach**: Use CPU for preprocessing, GPU for training
+- **Frame extraction**: Works great on CPU
+- **COLMAP/GLOMAP**: Works on CPU but slower (still reasonable)
+- **Gaussian Splatting training**: Not recommended on CPU (too slow)
+- **Best approach**: Use CPU for preprocessing, GPU for training
 
 For questions or issues, see the main [README](../README.md) or open an issue on GitHub.

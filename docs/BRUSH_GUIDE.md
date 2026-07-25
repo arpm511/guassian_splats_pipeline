@@ -137,15 +137,15 @@ Brush provides several training presets:
 
 | Feature | Brush (GUI) | gaussian-splatting (CLI) |
 |---------|-------------|--------------------------|
-| **Ease of Use** | ⭐⭐⭐⭐⭐ Very Easy | ⭐⭐⭐ Moderate |
-| **Real-time Visualization** | ✅ Yes | ❌ No |
-| **Interactive** | ✅ Yes | ❌ No |
-| **Parameter Tuning** | ✅ Easy UI | ⚠️ Command line flags |
-| **Cross-platform** | ✅ Windows, Linux, macOS | ⚠️ Requires compilation |
-| **Installation** | ✅ Simple download | ⚠️ Complex setup |
-| **Automation** | ❌ Manual process | ✅ Scriptable |
-| **Advanced Options** | ⚠️ Limited | ✅ Full control |
-| **Training Speed** | 🔄 Similar | 🔄 Similar |
+| **Ease of Use** | Very Easy | Moderate |
+| **Real-time Visualization** | Yes | No |
+| **Interactive** | Yes | No |
+| **Parameter Tuning** | Easy UI | Command line flags |
+| **Cross-platform** | Windows, Linux, macOS | Requires compilation |
+| **Installation** | Simple download | Complex setup |
+| **Automation** | Manual process | Scriptable |
+| **Advanced Options** | Limited | Full control |
+| **Training Speed** | Similar | Similar |
 
 ## When to Use Brush vs CLI
 

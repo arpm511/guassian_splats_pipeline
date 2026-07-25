@@ -63,24 +63,25 @@ def run_colmap(
         "--ImageReader.single_camera", "1",
     ]
     
-    # GPU mode (only add if GPU is enabled and available)
-    if gpu:
-        feature_cmd.extend(["--SiftExtraction.use_gpu", "1"])
+    # GPU mode - COLMAP 4.0+ uses --FeatureExtraction.use_gpu (defaults to 1 if CUDA available)
+    # Only disable if explicitly requested with --no_gpu
+    if not gpu:
+        feature_cmd.extend(["--FeatureExtraction.use_gpu", "0"])
     
-    # Set quality parameters
+    # Set quality parameters (COLMAP 4.0+ uses --FeatureExtraction.max_image_size)
     if quality == "high":
         feature_cmd.extend([
-            "--SiftExtraction.max_image_size", "4096",
+            "--FeatureExtraction.max_image_size", "4096",
             "--SiftExtraction.max_num_features", "8192"
         ])
     elif quality == "medium":
         feature_cmd.extend([
-            "--SiftExtraction.max_image_size", "2048",
+            "--FeatureExtraction.max_image_size", "2048",
             "--SiftExtraction.max_num_features", "4096"
         ])
     else:  # low
         feature_cmd.extend([
-            "--SiftExtraction.max_image_size", "1024",
+            "--FeatureExtraction.max_image_size", "1024",
             "--SiftExtraction.max_num_features", "2048"
         ])
     
@@ -96,9 +97,10 @@ def run_colmap(
         "--database_path", str(database_path),
     ]
     
-    # GPU mode (only add if GPU is enabled and available)
-    if gpu:
-        matching_cmd.extend(["--SiftMatching.use_gpu", "1"])
+    # GPU mode - COLMAP 4.0+ uses --FeatureMatching.use_gpu (defaults to 1 if CUDA available)
+    # Only disable if explicitly requested with --no_gpu
+    if not gpu:
+        matching_cmd.extend(["--FeatureMatching.use_gpu", "0"])
     
     subprocess.run(_run_with_display(matching_cmd), check=True)
     

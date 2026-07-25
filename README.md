@@ -126,10 +126,12 @@ cmake .. -DCMAKE_CUDA_ARCHITECTURES=native
 make -j$(nproc)
 sudo make install
 
-# Verify installation
-colmap -h
+# Verify installation (check if CUDA is enabled)
+colmap -h | head -1  # Should show "with CUDA" if GPU support is enabled
 ```
 
+> **Important**: For GPU acceleration, ensure COLMAP is built with CUDA support. If `colmap -h` shows "without CUDA", you'll need to rebuild with CUDA toolkit installed. CPU-only COLMAP works but is slower.
+> 
 > **Note**: GLOMAP functionality is now built into COLMAP 4.0+ as the `global_mapper` command. No separate GLOMAP installation needed!
 
 ### 3. Install SkySplat Addon
@@ -304,11 +306,13 @@ make -j$(nproc)
 sudo make install
 cd ../..
 
-# Verify COLMAP installation
-colmap -h
+# Verify COLMAP installation and CUDA support
+colmap -h | head -1  # Should show "with CUDA" for GPU acceleration
 colmap mapper -h  # Traditional incremental mapper
 colmap global_mapper -h  # GLOMAP's global mapper (faster)
 ```
+
+> **Important**: Verify that COLMAP shows "with CUDA" when you run `colmap -h`. If it shows "without CUDA", reconstruction will still work but will be slower. To enable CUDA, ensure CUDA toolkit is installed before building COLMAP.
 
 #### Step 2: Install uv and Setup Python Environment
 
@@ -332,7 +336,7 @@ uv pip install torch torchvision torchaudio --index-url https://download.pytorch
 uv pip install -e .
 
 # Verify PyTorch CUDA
-python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
+python3 -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
 ```
 
 #### Step 3: Install Brush for Training
@@ -370,7 +374,7 @@ source .venv/bin/activate  # if using uv
 docker-compose exec gaussian-splatting /bin/bash  # if using Docker
 
 # Run environment check
-python scripts/check_environment.py
+python3 scripts/check_environment.py
 ```
 
 This script verifies:
