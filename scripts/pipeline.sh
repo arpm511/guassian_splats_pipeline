@@ -1,6 +1,8 @@
 #!/bin/bash
 # Complete pipeline script for Gaussian Splatting
 # Usage: ./pipeline.sh <video_path> <project_name>
+# 
+# Updated for COLMAP 4.0+ with global mapper support
 
 set -e  # Exit on error
 
@@ -15,11 +17,17 @@ VIDEO_PATH=$1
 PROJECT_NAME=$2
 
 echo "======================================"
-echo "Gaussian Splatting Pipeline"
+echo "Gaussian Splatting Pipeline v2.0"
 echo "======================================"
 echo "Video: $VIDEO_PATH"
 echo "Project: $PROJECT_NAME"
 echo "======================================"
+
+# Verify video exists
+if [ ! -f "$VIDEO_PATH" ]; then
+    echo "Error: Video file not found: $VIDEO_PATH"
+    exit 1
+fi
 
 # Setup directories
 FRAMES_DIR="data/processed/frames/${PROJECT_NAME}"
@@ -37,28 +45,46 @@ python3 scripts/extract_frames.py \
     --fps 2 \
     --quality 95
 
-# Step 2: Run COLMAP
+# Step 2: Run COLMAP with global mapper (faster)
 echo ""
-echo "Step 2/3: Running COLMAP reconstruction..."
+echo "Step 2/3: Running COLMAP reconstruction with global mapper..."
 python3 scripts/run_colmap.py \
     --images_dir "$FRAMES_DIR" \
     --output_dir "$COLMAP_DIR" \
     --camera_model OPENCV \
-    --quality high
+    --quality high \
+    --use_global_mapper  # Use global mapper (was GLOMAP)
 
 # Step 3: Train Gaussian Splatting
 echo ""
 echo "Step 3/3: Training Gaussian Splatting model..."
-python3 scripts/train_gaussian_splat.py \
-    --source_path "$COLMAP_DIR" \
-    --model_path "$MODEL_DIR" \
-    --iterations 30000 \
-    --export_ply "${MODEL_DIR}/point_cloud.ply"
+# Check if Brush is available
+if command -v brush_app &> /dev/null; then
+    echo "Using Brush for training..."
+    brush_app train \
+        --data "$COLMAP_DIR" \
+        --output "$MODEL_DIR" \
+        --iterations 30000
+else
+    # Fall back to python training script
+    echo "Using Python training script..."
+    python3 scripts/train_gaussian_splat.py \
+        --source_path "$COLMAP_DIR" \
+        --model_path "$MODEL_DIR" \
+        --iterations 30000
+fi
 
 echo ""
 echo "======================================"
 echo "Pipeline Complete!"
 echo "======================================"
 echo "Model saved to: $MODEL_DIR"
-echo "PLY file for Blender: ${MODEL_DIR}/point_cloud.ply"
+echo "Look for: ${MODEL_DIR}/point_cloud.ply"
 echo "======================================"
+echo ""
+echo "Next steps:"
+echo "1. Open Blender (5.2 LTS or 4.5 LTS)"
+echo "2. Install KIRI 3DGS Render addon"
+echo "3. Import the PLY file: ${MODEL_DIR}/point_cloud.ply"
+echo "4. Render and create amazing visualizations!"
+echo ""

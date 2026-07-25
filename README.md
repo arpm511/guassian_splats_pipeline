@@ -2,18 +2,30 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A complete end-to-end pipeline for creating Gaussian Splats from video footage and visualizing them in Blender. This project demonstrates the full workflow from video capture to 3D reconstruction using state-of-the-art Gaussian Splatting technology.
+A complete educational resource for creating 3D Gaussian Splats from video footage and visualizing them in Blender. This repository provides **two clear workflow paths** to accommodate different skill levels and use cases, making it easy for students and researchers to get started with Gaussian Splatting.
 
 ![Pipeline Overview](docs/images/pipeline_overview.png)
 <!-- TODO: Add pipeline overview diagram -->
 
 ## Overview
 
-This repository provides a streamlined workflow for:
-1. **Video Processing**: Extract frames from video footage
-2. **Structure-from-Motion**: Use COLMAP for feature extraction and GLOMAP for fast reconstruction
-3. **Gaussian Splatting**: Train with Brush (interactive GUI) or command-line tools
-4. **Blender Visualization**: Import and render the Gaussian Splat in Blender with Kiri 3DGS addon
+This repository helps you create photorealistic 3D Gaussian Splats from video or images through **two workflow approaches**:
+
+### **Path 1: SkySplat (Recommended for Beginners)**
+An all-in-one Blender addon that automates the entire pipeline within Blender's familiar interface:
+- Frame extraction, COLMAP processing, model transformation, and Brush training
+- Visual, interactive workflow with minimal command-line work
+- Perfect for learning and experimentation
+- **Best for**: Students, artists, first-time users, quick prototyping
+
+### **Path 2: Manual Pipeline (For Advanced Users)**
+Full control over each step with Python scripts, Docker, and command-line tools:
+- Customizable parameters at every stage
+- Scriptable and automatable for batch processing
+- Better for understanding the underlying technology
+- **Best for**: Researchers, developers, production workflows, batch processing
+
+Both paths produce the same high-quality results and can be visualized in Blender!
 
 ### What are Gaussian Splats?
 
@@ -25,114 +37,86 @@ Gaussian Splatting is a novel 3D representation technique that uses 3D Gaussians
 
 ## Table of Contents
 
-- [Features](#features)
+- [Which Path Should I Choose?](#which-path-should-i-choose)
 - [Requirements](#requirements)
-- [Installation](#installation)
-  - [Option 1: Docker (Recommended)](#option-1-docker-recommended)
-  - [Option 2: Local Installation](#option-2-local-installation)
-- [Quick Start](#quick-start)
-- [Detailed Workflow](#detailed-workflow)
-  - [Step 1: Video Capture](#step-1-video-capture)
-  - [Step 2: Frame Extraction](#step-2-frame-extraction)
-  - [Step 3: COLMAP Reconstruction](#step-3-colmap-reconstruction)
-  - [Step 4: Gaussian Splatting Training](#step-4-gaussian-splatting-training)
-    - [Option A: Brush (Interactive GUI)](#option-a-brush-interactive-gui)
-    - [Option B: Command-Line Training](#option-b-command-line-training)
-  - [Step 5: Blender Visualization](#step-5-blender-visualization)
+- [Path 1: SkySplat Workflow](#path-1-skysplat-workflow-recommended-for-beginners)
+  - [Installation](#skysplat-installation)
+  - [Quick Start](#skysplat-quick-start)
+  - [Complete Workflow](#skysplat-complete-workflow)
+- [Path 2: Manual Pipeline](#path-2-manual-pipeline-for-advanced-users)
+  - [Installation Options](#manual-pipeline-installation)
+  - [Quick Start](#manual-quick-start)
+  - [Detailed Workflow](#manual-detailed-workflow)
+- [Video Capture Tips](#video-capture-tips)
+- [Blender Visualization](#blender-visualization)
 - [Project Structure](#project-structure)
 - [Troubleshooting](#troubleshooting)
 - [Credits](#credits)
 - [License](#license)
 
-## Features
+## Which Path Should I Choose?
 
-- **Automated Pipeline**: Complete scripts for end-to-end processing
-- **GLOMAP Integration**: Faster reconstruction than traditional COLMAP (10-50x speedup)
-- **Multiple Training Options**: Choose between Brush GUI (interactive) or CLI (automated)
-- **Docker Support**: Pre-configured Docker environment with all dependencies
-- **CPU Support**: Alternative setup for systems without NVIDIA GPU
-- **Flexible Input**: Works with video files or image sequences
-- **Quality Controls**: Adjustable settings for speed vs. quality tradeoffs
-- **Blender Integration**: Ready-to-import PLY files for 3D visualization with Kiri 3DGS addon
-- **Well Documented**: Comprehensive guides with images and examples
+| Feature | SkySplat (Path 1) | Manual Pipeline (Path 2) |
+|---------|-------------------|--------------------------|
+| **Ease of Use** | Visual UI | Command line |
+| **Setup Time** | ~15 minutes | ~30-60 minutes |
+| **Learning Curve** | Gentle | Steep |
+| **Customization** | Limited to UI options | Full control |
+| **Automation** | Multi-instance in Blender | Scriptable CLI |
+| **Best For** | Learning, single scenes | Production, batches |
+
+**Recommendation**: Start with SkySplat to understand the workflow, then move to the manual pipeline if you need more control or automation.
 
 ## Requirements
 
 ### Hardware Requirements
 - **GPU**: NVIDIA GPU with CUDA support (8GB+ VRAM recommended)
-  - *CPU-only option available* - see [CPU Setup Guide](docs/CPU_SETUP.md)
-- **RAM**: 16GB+ system RAM recommended
-- **Storage**: 10GB+ free space per project
+  - GTX 1060 or better (Pascal architecture or newer)
+- **RAM**: 16GB+ system RAM recommended (32GB+ for large scenes)
+- **Storage**: 10GB+ free space per project (SSD recommended)
 
 ### Software Requirements
-- **Docker** (recommended) OR
-- **CUDA 12.1+** with compatible drivers (for GPU)
-- **Python 3.10+**
-- **COLMAP 3.8+** and **GLOMAP** (latest)
-- **Blender 4.5+** (for visualization, 4.2+ compatible)
 
-## Installation
+#### For Both Paths:
+- **OS**: Ubuntu 22.04/24.04 or WSL2 Ubuntu (Windows users can use WSL)
+- **GPU**: NVIDIA drivers (535+ recommended) and CUDA 12.1+
+- **Blender**: 5.2 LTS (or 4.5 LTS minimum for compatibility)
 
-### Option 1: Docker (Recommended)
+#### Path-Specific:
+- **SkySplat**: COLMAP 4.1+, Blender with SkySplat addon
+- **Manual Pipeline**: Python 3.11, Docker (optional), uv (for Python env management)
 
-Docker provides the easiest setup with all dependencies pre-configured.
+> **Note**: This guide focuses on Linux/WSL Ubuntu. The tools are cross-platform, but setup instructions are optimized for Ubuntu to reduce complexity. Mac and native Windows users should adapt accordingly or use Docker.
 
-**For GPU systems (NVIDIA CUDA):**
+---
 
-1. **Install Docker Desktop**
-   - Windows/Mac: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-   - Linux: [Docker Engine](https://docs.docker.com/engine/install/)
+# Path 1: SkySplat Workflow (Recommended for Beginners)
 
-2. **Install NVIDIA Container Toolkit**
-   ```bash
-   # Ubuntu/Debian
-   distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-   curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-   curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
-       sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-       sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-   sudo apt-get update
-   sudo apt-get install -y nvidia-container-toolkit
-   sudo systemctl restart docker
-   ```
+SkySplat is a comprehensive Blender addon that streamlines the complete workflow for creating 3D Gaussian Splats. Everything happens within Blender's familiar interface!
 
-3. **Clone and Build**
-   ```bash
-   git clone https://github.com/arpm511/gaussian-splats.git
-   cd gaussian-splats
-   docker-compose build
-   docker-compose up -d
-   docker-compose exec gaussian-splatting /bin/bash
-   ```
+## SkySplat Installation
 
-**For CPU-only systems (no NVIDIA GPU):**
+### 1. Install Blender
+
+Download and install [Blender 5.2 LTS](https://www.blender.org/download/) (or 4.5 LTS minimum):
+
 ```bash
-# Build CPU-only Docker image
-docker-compose -f docker-compose-cpu.yml build
-docker-compose -f docker-compose-cpu.yml up -d
-docker-compose -f docker-compose-cpu.yml exec gaussian-splatting-cpu /bin/bash
+# Ubuntu - Download from website or use snap
+sudo snap install blender --classic
 ```
 
-**Note**: CPU processing is significantly slower. See [CPU Setup Guide](docs/CPU_SETUP.md) for details and optimization tips.
+### 2. Install COLMAP
 
-See [docker/README.md](docker/README.md) for detailed Docker setup instructions including Docker CLI (free alternative to Docker Desktop).
+COLMAP 4.1+ is required for Structure-from-Motion reconstruction.
 
-### Option 2: Local Installation
-
-<details>
-<summary>Click to expand local installation instructions</summary>
-
-#### Install CUDA and Drivers
-
-1. Install [NVIDIA CUDA Toolkit 12.1](https://developer.nvidia.com/cuda-downloads)
-2. Verify installation: `nvidia-smi`
-
-#### Install COLMAP
-
-**Ubuntu/Debian:**
+**Ubuntu 22.04/24.04:**
 ```bash
-sudo apt-get install \
-    git cmake build-essential libboost-all-dev \
+# Option A: Install from Ubuntu repositories (may be older version)
+sudo apt update
+sudo apt install colmap
+
+# Option B: Build from source (recommended for latest 4.1+)
+sudo apt install -y git cmake build-essential libboost-all-dev \
     libeigen3-dev libsuitesparse-dev libfreeimage-dev \
     libmetis-dev libgoogle-glog-dev libgflags-dev \
     libglew-dev qtbase5-dev libqt5opengl5-dev libcgal-dev \
@@ -142,401 +126,810 @@ git clone https://github.com/colmap/colmap.git
 cd colmap
 mkdir build && cd build
 cmake .. -DCMAKE_CUDA_ARCHITECTURES=native
-make -j
+make -j$(nproc)
 sudo make install
+
+# Verify installation
+colmap -h
 ```
 
-**Windows:**
-Download pre-built binaries from [COLMAP Releases](https://github.com/colmap/colmap/releases)
+> **Note**: GLOMAP functionality is now built into COLMAP 4.0+ as the `global_mapper` command. No separate GLOMAP installation needed!
 
-#### Install GLOMAP (for faster reconstruction)
+### 3. Install SkySplat Addon
 
-**Ubuntu/Debian:**
+1. **Download the latest release**:
+   - Visit [SkySplat Releases](https://github.com/kyjohnso/skysplat_blender/releases/latest)
+   - Download the `.zip` file (e.g., `skysplat_blender-v0.4.2.zip`)
+
+2. **Install in Blender**:
+   - Open Blender
+   - Go to `Edit` → `Preferences` → `Add-ons`
+   - Click `Install...` and select the downloaded ZIP file
+   - Enable the addon by checking the box next to "3D View: SkySplat: 3DGS Blender Toolkit"
+
+3. **Configure Brush executable** (bundled with addon):
+   
+   On Linux, make the Brush binary executable:
+   ```bash
+   cd ~/.config/blender/5.2/scripts/addons/skysplat_blender/binaries/
+   chmod +x brush_app_linux
+   ```
+
+4. **Access SkySplat**:
+   - In Blender's 3D View, press `N` to open the sidebar
+   - Click the `SkySplat` tab
+
+**That's it!** You're ready to create Gaussian Splats in Blender.
+
+## SkySplat Quick Start
+
+### Basic Workflow (5 Steps)
+
+1. **Load Video** → Import your video, extract frames
+2. **Run COLMAP** → Reconstruct camera poses and 3D points
+3. **Transform Model** → Align and scale in Blender 3D view
+4. **Train Splat** → Run Brush training with visual progress
+5. **Visualize** → Import PLY into Blender with KIRI 3DGS addon
+
+### Example: Process Your First Scene
+
 ```bash
-git clone https://github.com/colmap/glomap.git
-cd glomap
+# 1. Prepare your video
+# Place video in a known location, e.g., ~/Videos/my_scene.mp4
+```
+
+**In Blender with SkySplat:**
+
+1. **Video Panel**:
+   - Click `+` to add a video instance
+   - Browse to your video file
+   - Click `Load Video and SRT`
+   - Adjust frame range if needed
+   - Click `Extract Frames` (frames saved to auto-generated path)
+
+2. **COLMAP Panel**:
+   - Click `+` to add a COLMAP instance
+   - Click the 🔗 (chain link icon) to link with video instance
+   - Select camera model (OPENCV for most cameras)
+   - Click `Run COLMAP` (this takes 10-30 mins)
+   - Monitor progress in Blender's terminal/console
+
+3. **Transform Panel**:
+   - Click `Load COLMAP Model` (cameras and points appear in 3D view)
+   - Transform the `COLMAP_Root` object (scale/rotate/translate)
+   - Click `Export Transformed Model` when aligned
+
+4. **Brush (3DGS) Panel**:
+   - Click `Prepare Brush Dataset`
+   - Click `+` to add a Splat instance
+   - Configure training iterations (7000 for preview, 30000 for quality)
+   - Click `Run Brush Training`
+   - Wait for training (10-60 mins depending on iterations)
+
+5. **Visualize**:
+   - Install KIRI 3DGS Render addon (see [Blender Visualization](#blender-visualization))
+   - Import the trained `.ply` file
+   - Render in viewport or final render!
+
+## SkySplat Complete Workflow
+
+For detailed instructions, parameter explanations, and troubleshooting, see the [SkySplat GitHub repository](https://github.com/kyjohnso/skysplat_blender). Key features:
+
+- **Multi-Instance Workflow**: Process multiple videos in one .blend file without conflicts
+- **Camera Animation**: Auto-generate animated cameras from COLMAP poses
+- **Real-time Monitoring**: See training progress in Blender console
+- **Integrated Tools**: Brush binaries included for all platforms
+
+**Benefits:**
+- No command-line Python environment setup needed
+- Visual feedback at every step
+- Perfect for learning the pipeline
+- Great for single scenes and experimentation
+
+---
+
+# Path 2: Manual Pipeline (For Advanced Users)
+
+The manual pipeline gives you full control over each step with Python scripts, custom parameters, and optional Docker containerization.
+
+## Manual Pipeline Installation
+
+Choose between Docker (easiest) or local installation (more flexible).
+
+### Option 1: Docker (Recommended for Manual Pipeline)
+
+Docker provides a pre-configured environment with all dependencies.
+
+**Prerequisites:**
+```bash
+# Install Docker Engine
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+# Log out and back in for group changes
+
+# Install NVIDIA Container Toolkit
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | \
+    sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+sudo systemctl restart docker
+
+# Verify GPU access
+docker run --rm --gpus all nvidia/cuda:12.1.0-base-ubuntu22.04 nvidia-smi
+```
+
+**Build and run:**
+```bash
+git clone https://github.com/arpm511/gaussian-splats.git
+cd gaussian-splats
+docker-compose build
+docker-compose up -d
+docker-compose exec gaussian-splatting /bin/bash
+```
+
+### Option 2: Local Installation with uv (Recommended)
+
+**Why uv?** Manages Python versions and dependencies in isolated environments, preventing conflicts with other projects.
+
+#### Step 1: Install System Dependencies
+
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install CUDA (if not already installed)
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+sudo dpkg -i cuda-keyring_1.1-1_all.deb
+sudo apt-get update
+sudo apt-get install -y cuda-toolkit-12-1
+
+# Verify
+nvidia-smi
+nvcc --version
+
+# Install COLMAP dependencies and build from source
+sudo apt install -y git cmake build-essential libboost-all-dev \
+    libeigen3-dev libsuitesparse-dev libfreeimage-dev \
+    libmetis-dev libgoogle-glog-dev libgflags-dev \
+    libglew-dev qtbase5-dev libqt5opengl5-dev libcgal-dev \
+    libceres-dev ffmpeg
+
+# Build COLMAP 4.1+ (includes GLOMAP functionality)
+git clone https://github.com/colmap/colmap.git
+cd colmap
 mkdir build && cd build
 cmake .. -DCMAKE_CUDA_ARCHITECTURES=native
-make -j
+make -j$(nproc)
 sudo make install
+cd ../..
+
+# Verify COLMAP installation
+colmap -h
+colmap mapper -h  # Traditional incremental mapper
+colmap global_mapper -h  # GLOMAP's global mapper (faster)
 ```
 
-**Windows:**
-Download pre-built binaries from [GLOMAP Releases](https://github.com/colmap/glomap/releases)
-
-**Note**: GLOMAP is optional but recommended - it's 10-50x faster than COLMAP's mapper for reconstruction.
-
-#### Install Python Dependencies
+#### Step 2: Install uv and Setup Python Environment
 
 ```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# Install uv (fast Python package installer)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.cargo/env  # Add uv to PATH
 
-# Install PyTorch with CUDA
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# Clone this repository
+git clone https://github.com/arpm511/guassian_splats_pipeline.git
+cd gaussian-splats
 
-# Install other requirements
-pip install -r requirements.txt
+# Create Python 3.11 environment with uv
+uv venv --python 3.11
+source .venv/bin/activate
+
+# Install PyTorch with CUDA support
+uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Install project dependencies from pyproject.toml
+uv pip install -e .
+
+# Verify PyTorch CUDA
+python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
 ```
 
-#### Install Gaussian Splatting
+#### Step 3: Install Brush for Training
+
+Brush is a fast, modern Gaussian Splatting trainer with both GUI and CLI:
 
 ```bash
-git clone https://github.com/graphdeco-inria/gaussian-splatting --recursive
-cd gaussian-splatting
-pip install -r requirements.txt
+# Option 1: Download pre-built binaries (easiest)
+# Visit https://github.com/ArthurBrussee/brush/releases
+# Download for your platform and make executable:
+chmod +x brush_app
+sudo mv brush_app /usr/local/bin/  # Or keep in project directory
+
+# Option 2: Build from source (requires Rust)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+git clone https://github.com/ArthurBrussee/brush.git
+cd brush
+cargo build --release
+# Executable: target/release/brush_app
+sudo cp target/release/brush_app /usr/local/bin/  # Optional: install globally
+cd ..
+
+# Verify installation
+brush_app --version
 ```
 
-</details>
+> **Note**: If you need the original GraphDeco implementation for research purposes, it requires conda and a separate environment. See the [GraphDeco repository](https://github.com/graphdeco-inria/gaussian-splatting) for installation instructions.
 
-## Quick Start
+### Quick Environment Check
 
-### Using the Automated Pipeline
-
-**Linux/Mac:**
 ```bash
+# Activate environment
+source .venv/bin/activate  # if using uv
+# or
+docker-compose exec gaussian-splatting /bin/bash  # if using Docker
+
+# Run environment check
+python scripts/check_environment.py
+```
+
+This script verifies:
+- CUDA/GPU availability
+- COLMAP installation  
+- Python packages
+- Directory structure
+
+## Manual Quick Start
+
+### Using the Automated Pipeline Script
+
+**Linux:**
+```bash
+source .venv/bin/activate  # Activate your uv environment
 ./scripts/pipeline.sh data/input/videos/your_video.mp4 my_project
 ```
 
-**Windows (PowerShell):**
-```powershell
-.\scripts\pipeline.ps1 -VideoPath "data\input\videos\your_video.mp4" -ProjectName "my_project"
-```
-
-This will automatically:
+This automated script will:
 1. Extract frames from your video
-2. Run COLMAP reconstruction
-3. Train the Gaussian Splatting model
+2. Run COLMAP reconstruction (with global mapper option)
+3. Train the Gaussian Splatting model with Brush
 4. Export PLY file for Blender
 
 ### Manual Step-by-Step
 
-If you prefer more control, run each step individually:
+For more control over parameters:
 
 ```bash
+# Activate environment
+source .venv/bin/activate
+
 # 1. Extract frames
 python scripts/extract_frames.py data/input/videos/scene.mp4 \
     --output_dir data/processed/frames/scene \
-    --fps 2
+    --fps 2 \
+    --quality 95
 
-# 2. Run COLMAP
+# 2. Run COLMAP with global mapper (faster, was GLOMAP)
 python scripts/run_colmap.py \
     --images_dir data/processed/frames/scene \
-    --output_dir data/processed/colmap/scene
+    --output_dir data/processed/colmap/scene \
+    --camera_model OPENCV \
+    --use_global_mapper \
+    --quality high
 
-# 3. Train Gaussian Splat
-python scripts/train_gaussian_splat.py \
-    --source_path data/processed/colmap/scene \
-    --model_path data/output/splats/scene \
-    --iterations 30000 \
-    --export_ply data/output/splats/scene/point_cloud.ply
+# 3. Train with Brush (or use gaussian-splatting repo)
+# Using Brush CLI (recommended):
+brush_app train \
+    --data data/processed/colmap/scene \
+    --output data/output/splats/scene \
+    --iterations 30000
 ```
 
-## Detailed Workflow
+## Manual Detailed Workflow
 
-### Step 1: Video Capture
+### Step 1: Frame Extraction
 
-For best results when capturing video:
-- **Movement**: Move slowly and smoothly around the object/scene
-- **Coverage**: Capture from multiple angles (360° if possible)
-- **Lighting**: Use consistent, even lighting
-- **Duration**: 30-60 seconds of footage is usually sufficient
-- **Resolution**: 1080p or higher
-- **Frame Rate**: 30fps or 60fps
-
-![Video Capture Tips](docs/images/video_capture_tips.png)
-<!-- TODO: Add video capture best practices image/gif -->
-
-### Step 2: Frame Extraction
-
-Extract frames from your video:
+Extract frames from your video with customizable parameters:
 
 ```bash
 python scripts/extract_frames.py <video_path> \
     --output_dir data/processed/frames/<project_name> \
     --fps 2 \
     --max_frames 300 \
-    --quality 95
+    --quality 95 \
+    --start_time 0 \
+    --end_time 60
 ```
 
 **Parameters:**
 - `--fps`: Frames per second to extract (lower = fewer frames, faster processing)
 - `--max_frames`: Maximum number of frames to extract
 - `--quality`: JPEG quality (0-100, higher = better quality, larger files)
+- `--start_time`/`--end_time`: Extract specific video segment (in seconds)
 
 **Recommendations:**
-- For static scenes: 1-2 FPS
-- For dynamic scenes: 2-5 FPS
-- Aim for 100-300 frames total
+- For static scenes: 1-2 FPS (100-200 frames)
+- For dynamic scenes: 2-5 FPS (200-300 frames)
+- Aim for 100-300 frames total for best results
 
-### Step 3: COLMAP + GLOMAP Reconstruction
+### Step 2: COLMAP Reconstruction
 
-COLMAP performs feature extraction and matching, while GLOMAP performs fast reconstruction to create camera poses and a sparse 3D point cloud:
+COLMAP 4.0+ includes the global mapper (formerly GLOMAP) for fast reconstruction:
 
 ```bash
 python scripts/run_colmap.py \
     --images_dir data/processed/frames/<project_name> \
     --output_dir data/processed/colmap/<project_name> \
     --camera_model OPENCV \
-    --quality high
+    --quality high \
+    --use_global_mapper  # Use global SfM (faster, was GLOMAP)
 ```
 
 **Parameters:**
-- `--camera_model`: Camera model (OPENCV, PINHOLE, RADIAL)
+- `--camera_model`: Camera model (OPENCV, PINHOLE, SIMPLE_RADIAL)
 - `--quality`: Processing quality (high, medium, low)
-- `--no_gpu`: Disable GPU acceleration (for CPU-only systems)
-- `--no_glomap`: Use COLMAP mapper instead of GLOMAP (slower but more compatible)
+  - `high`: 4096px max, 8192 features (best quality, slower)
+  - `medium`: 2048px max, 4096 features (balanced)
+  - `low`: 1024px max, 2048 features (fastest)
+- `--use_global_mapper`: Use global SfM (recommended, 10-50x faster)
+- `--no_gpu`: Disable GPU acceleration
 
-**This step can take 10-60 minutes depending on:**
-- Number of images
-- Image resolution
-- Quality settings
-- Hardware (GPU vs CPU)
+**Understanding COLMAP Mappers:**
 
-**GLOMAP vs COLMAP**: GLOMAP is automatically used for the reconstruction step if available, providing 10-50x faster processing. COLMAP handles feature extraction and matching.
+COLMAP 4.0+ offers two reconstruction approaches:
 
-![COLMAP Process](docs/images/colmap_process.png)
-<!-- TODO: Add COLMAP visualization image -->
+1. **Global Mapper** (recommended, was GLOMAP):
+   ```bash
+   --use_global_mapper
+   ```
+   - 10-50x faster than incremental
+   - Better for drone footage and large scenes
+   - Requires more RAM
 
-### Step 4: Gaussian Splatting Training
+2. **Incremental Mapper** (traditional):
+   ```bash
+   # Default if --use_global_mapper not specified
+   ```
+   - More robust for challenging cases
+   - Works with lower RAM
+   - Slower but very reliable
 
-You have two options for training: **Brush (GUI)** for interactive training with real-time visualization, or **Command-Line** for automated/scripted workflows.
+**Processing Time:**
+- 100 images: 5-15 minutes (global) or 20-45 minutes (incremental)
+- 200 images: 10-30 minutes (global) or 45-90 minutes (incremental)
+- GPU accelerates feature extraction and matching
 
-#### Option A: Brush (Interactive GUI)
+### Step 3: Gaussian Splatting Training
 
-[Brush](https://github.com/ArthurBrussee/brush) provides an intuitive interface with real-time visualization during training.
+Train using Brush for fast, high-quality results:
 
-1. **Download and Install Brush**
-   - Visit [Brush Releases](https://github.com/ArthurBrussee/brush/releases)
-   - Download for your platform (Windows/Linux/macOS)
-   - Extract and run the executable
-
-2. **Load Your Data**
-   - Launch Brush
-   - Click `Directory` button
-   - Navigate to your COLMAP output: `data/processed/colmap/<project_name>`
-   - Select the parent folder (containing `sparse/` directory)
-
-3. **Configure and Train**
-   - Choose training preset (Quick/Balanced/High Quality)
-   - Click `Start` to begin training
-   - Watch real-time progress in viewport
-   - Navigate with WASD/QE keys during training
-
-4. **Export**
-   - Click `Export` when training completes
-   - Save to: `data/output/splats/<project_name>/point_cloud.ply`
-
-**Brush Benefits:**
-- ✅ Real-time visualization
-- ✅ Interactive parameter adjustment
-- ✅ No command line needed
-- ✅ Easy to learn
-
-See [docs/BRUSH_GUIDE.md](docs/BRUSH_GUIDE.md) for detailed Brush instructions.
-
-#### Option B: Command-Line Training
-
-For automated workflows and scripting:
-
+**Interactive GUI:**
 ```bash
-python scripts/train_gaussian_splat.py \
-    --source_path data/processed/colmap/<project_name> \
-    --model_path data/output/splats/<project_name> \
-    --iterations 30000 \
-    --resolution 1 \
-    --export_ply data/output/splats/<project_name>/point_cloud.ply
+# Launch Brush GUI
+brush_app
+# Load data/processed/colmap/<project_name> using File menu
+# Configure training parameters visually
+# Monitor training progress in real-time
 ```
 
-**Parameters:**
-- `--iterations`: Training iterations (7000 = fast preview, 30000 = high quality)
-- `--resolution`: Resolution downscale (1 = full, 2 = half, 4 = quarter)
-- `--export_ply`: Export PLY file after training
+**Command Line:**
+```bash
+brush_app train \
+    --data data/processed/colmap/<project_name> \
+    --output data/output/splats/<project_name> \
+    --iterations 30000 \
+    --eval  # Enable validation during training
+```
 
-**CLI Benefits:**
-- ✅ Scriptable and automatable
-- ✅ Advanced parameter control
-- ✅ Works on headless servers
-- ✅ Batch processing support
+**Training Parameters:**
+- `--iterations`: Total training steps
+  - 7,000: Quick preview (~10-15 mins)
+  - 15,000: Good quality (~20-30 mins)
+  - 30,000: High quality (~40-60 mins)
+- `--resolution`: Downscale factor (1=full, 2=half, 4=quarter)
 
-**Training times (both methods):**
-- 7,000 iterations: ~10-20 minutes
-- 30,000 iterations: ~30-60 minutes
+**Training Tips:**
+- Start with 7,000 iterations to verify the reconstruction looks correct
+- Use lower resolution (`--resolution 2`) for faster iteration
+- Monitor GPU memory usage with `nvidia-smi`
+- Expect 4-8GB VRAM usage depending on scene complexity
 
-**Which to choose?**
-- **First time?** → Use Brush for visual feedback
-- **Experimenting?** → Use Brush to tune parameters
-- **Production?** → Use CLI for automation
-- **Multiple scenes?** → Use CLI for batch processing
+---
 
-![Training Progress](docs/images/training_progress.png)
-<!-- TODO: Add training progress visualization (can show Brush or CLI) -->
+## Video Capture Tips
 
-### Step 5: Blender Visualization
+For best reconstruction results, follow these guidelines when capturing footage:
 
-#### Installing the Kiri 3DGS Render Add-on
+### Camera Movement
+- **Move slowly and smoothly** - avoid jerky movements
+- **Maintain consistent speed** - helps with motion blur
+- **Overlap significantly** - 70-80% overlap between frames
+- **Capture from multiple angles** - 360° coverage when possible
+- **Avoid pure rotation** - include translation for better depth perception
 
-1. **Download the Blender Add-on**
-   - Get the [Kiri 3DGS Render add-on](https://github.com/KIRI-Innovation/kiri-3dgs-blender-addon)
-   - Go to [Releases](https://github.com/KIRI-Innovation/kiri-3dgs-blender-addon/releases)
-   - For Blender 4.5+: Download latest version
-   - For Blender 4.2-4.4: Download version 4.0
+### Scene Conditions
+- **Consistent lighting** - avoid changing light conditions during capture
+- **Avoid moving objects** - people, cars, animals create artifacts
+- **Well-textured surfaces** - plain walls are difficult to reconstruct
+- **Good contrast** - avoid overexposed or underexposed areas
+- **Stable camera** - use gimbal or steady hands
 
-2. **Install in Blender**
-   - Open Blender 4.5 (or 4.2+)
-   - Drag and drop the ZIP file into Blender
-   - Click `OK` to install
-   - Or: `Edit` → `Preferences` → `Add-ons` → `Install...`
+### Technical Settings
+- **Resolution**: 1080p minimum, 4K preferred
+- **Frame rate**: 30fps or 60fps
+- **Duration**: 30-60 seconds typically sufficient
+- **Shutter speed**: Match frame rate to reduce motion blur
+- **Focus**: Lock focus, avoid autofocus hunting
 
-![Blender Addon Install](docs/images/blender_addon_install.gif)
-<!-- TODO: Add gif showing addon installation -->
+### Scene Types
 
-#### Importing the Gaussian Splat
+| Scene Type | FPS to Extract | Total Frames | Notes |
+|------------|----------------|--------------|-------|
+| Small object | 2-5 | 100-200 | Rotate around object |
+| Room interior | 1-2 | 150-250 | Walk through slowly |
+| Building exterior | 1-2 | 200-300 | Circle building |
+| Landscape | 1-3 | 200-400 | Drone or walking path |
 
-1. **Open Blender 4.5** (or 4.2+)
+---
 
-2. **Open the 3DGS Panel**
-   - Press `N` to open the properties panel
-   - Click on the `3DGS Render` tab
+## Blender Visualization
 
-3. **Import PLY File**
-   - In the 3DGS Render panel, click `Import PLY`
-   - Navigate to `data/output/splats/<project_name>/point_cloud.ply`
+Both workflow paths produce `.ply` files that can be visualized in Blender using the KIRI 3DGS Render addon.
+
+### Install KIRI 3DGS Render Addon
+
+1. **Download the addon**:
+   - Visit [KIRI 3DGS Render Releases](https://github.com/Kiri-Innovation/3dgs-render-blender-addon/releases)
+   - Download the latest `.zip` file compatible with your Blender version
+   - Blender 5.2 LTS: Use latest release
+   - Blender 4.5 LTS: Check compatibility notes
+
+2. **Install in Blender**:
+   ```
+   Blender → Edit → Preferences → Add-ons → Install...
+   ```
+   - Select the downloaded ZIP file
+   - Enable "Render: 3DGS Render" addon
+
+3. **Verify installation**:
+   - Press `N` in 3D View to open sidebar
+   - Look for "3DGS Render" tab
+
+### Import and Visualize Gaussian Splat
+
+1. **Open Blender** (5.2 LTS or 4.5 LTS)
+
+2. **Import PLY file**:
+   - Open the `3DGS Render` panel (press `N`, select tab)
+   - Click `Import PLY`
+   - Navigate to your splat file:
+     - **SkySplat**: Check addon's export path
+     - **Manual**: `data/output/splats/<project>/point_cloud.ply`
    - Click `Import PLY`
 
-![Import Splat](docs/images/blender_import.gif)
-<!-- TODO: Add gif showing import process -->
+3. **View in viewport**:
+   - Switch viewport shading to `Rendered` mode (press `Z` → Rendered)
+   - The Gaussian Splat will render in real-time
+   - Navigate with mouse/keyboard as usual
 
-4. **View the Gaussian Splat**
-   - Press `Z` and select `Rendered` mode
-   - The splat will render in real-time in the viewport
-   - Adjust settings in the 3DGS Render panel as needed
+4. **Adjust settings**:
+   - In the 3DGS Render panel:
+     - **Splat Scale**: Adjust point sizes
+     - **Opacity**: Control transparency
+     - **Quality**: Set rendering quality
 
-![Blender Settings](docs/images/blender_settings.png)
-<!-- TODO: Add screenshot of settings panel -->
+5. **Render output**:
+   - Set up camera (`Add` → `Camera`)
+   - Configure render settings
+   - Render image: `F12`
+   - Render animation: `Ctrl+F12`
 
-5. **Render Setup**
-   - The 3DGS Render panel has options for rendering
-   - Use `Render` to create single frames
-   - Use `Combined with native render` to mix with 3D objects
-   - Set up lighting and camera as desired
+### Tips for Best Results
+- **Lighting**: Gaussian Splats are pre-lit, but can be combined with Blender lights
+- **Compositing**: Use compositor to add effects, color grading
+- **Animation**: Animate camera around splat for turntable renders
+- **Scale**: Adjust imported splat scale to match Blender scene units
+- **Performance**: Large splats may be slow in viewport - use lower quality preview
 
-For complete Blender instructions, see [docs/BLENDER_GUIDE.md](docs/BLENDER_GUIDE.md).
-
-![Final Render](docs/images/blender_render.png)
-<!-- TODO: Add final render example -->
+---
 
 ## Project Structure
 
 ```
-gaussian_splats/
+gaussian_splats_pipeline/
 ├── data/
 │   ├── input/
-│   │   ├── videos/          # Input video files
-│   │   └── images/          # Or input image sequences
+│   │   ├── videos/              # Input video files
+│   │   └── images/              # Or input image sequences
 │   ├── processed/
-│   │   ├── frames/          # Extracted frames
-│   │   └── colmap/          # COLMAP reconstruction data
+│   │   ├── frames/              # Extracted video frames
+│   │   │   └── <project_name>/
+│   │   └── colmap/              # COLMAP reconstruction output
+│   │       └── <project_name>/
+│   │           ├── database.db  # Feature database
+│   │           └── sparse/      # Sparse 3D reconstruction
+│   │               └── 0/       # Reconstruction model
 │   └── output/
-│       └── splats/          # Trained Gaussian Splat models
+│       └── splats/              # Trained Gaussian Splat models
+│           └── <project_name>/
+│               └── point_cloud.ply
 ├── scripts/
-│   ├── extract_frames.py    # Frame extraction script
-│   ├── run_colmap.py        # COLMAP wrapper script
-│   ├── train_gaussian_splat.py  # Training script
-│   ├── pipeline.sh          # Complete pipeline (Linux/Mac)
-│   └── pipeline.ps1         # Complete pipeline (Windows)
+│   ├── extract_frames.py        # Video → frames
+│   ├── run_colmap.py            # Frames → COLMAP reconstruction
+│   ├── train_gaussian_splat.py  # Training wrapper (legacy)
+│   ├── pipeline.sh              # Complete automated pipeline
+│   └── check_environment.py     # Verify setup
 ├── docs/
-│   └── images/              # Documentation images
-├── example/                 # Example data and results
+│   ├── BLENDER_GUIDE.md         # Detailed Blender instructions
+│   ├── BRUSH_GUIDE.md           # Brush training guide
+│   └── images/                  # Documentation images
 ├── docker/
-│   └── README.md            # Docker setup guide
-├── Dockerfile               # Docker configuration
-├── docker-compose.yml       # Docker Compose configuration
-├── requirements.txt         # Python dependencies
-├── .gitignore              # Git ignore rules
-└── README.md               # This file
+│   ├── Dockerfile               # Docker image definition
+│   ├── docker-compose.yml       # Docker Compose config
+│   └── README.md                # Docker setup guide
+├── requirements.txt             # Python dependencies (legacy, see pyproject.toml)
+├── pyproject.toml               # Modern Python project config (use with uv)
+├── .gitignore
+├── LICENSE
+└── README.md                    # This file
 ```
 
-## 🔧 Troubleshooting
+### Directory Management
+
+**SkySplat users**: The addon manages paths automatically. Check addon settings for output locations.
+
+**Manual pipeline users**: 
+- Organize by project name for clarity
+- Use consistent naming: `data/{input,processed,output}/<project_name>/`
+- The automated script (`pipeline.sh`) creates directories automatically
+
+---
+
+## Troubleshooting
 
 ### Common Issues
 
-**1. CUDA/GPU Not Detected**
+#### 1. CUDA/GPU Not Detected
+
 ```bash
 # Check NVIDIA driver
 nvidia-smi
 
-# Check CUDA in Docker
+# Check CUDA installation
+nvcc --version
+
+# Test PyTorch CUDA
+python -c "import torch; print(f'CUDA: {torch.cuda.is_available()}, Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"None\"}')"
+
+# Docker: Test GPU access
 docker run --rm --gpus all nvidia/cuda:12.1.0-base-ubuntu22.04 nvidia-smi
 ```
 
-**2. COLMAP Fails to Reconstruct**
-- Ensure images have sufficient overlap (70%+ recommended)
-- Check image quality (not too dark/bright, not blurry)
-- Try reducing `--quality` to `medium` or `low`
-- Use `--camera_model SIMPLE_RADIAL` for simple cameras
-- If GLOMAP fails, use `--no_glomap` to fall back to COLMAP mapper
+**Solutions:**
+- Update NVIDIA drivers: `sudo ubuntu-drivers autoinstall`
+- Reinstall CUDA toolkit
+- Verify Docker can access GPU with `--gpus all` flag
 
-**3. Training Crashes (Out of Memory)**
-- Reduce `--resolution` (try 2 or 4)
-- Reduce number of input images
-- Close other GPU-intensive applications
-- Use a GPU with more VRAM
-- Consider CPU-only for preprocessing, then cloud GPU for training
+#### 2. COLMAP Fails to Reconstruct
 
-**4. Blender Import Issues**
-- Ensure you have Kiri 3DGS addon version 4.0+ for Blender 4.2+
-- Ensure you have Blender 4.5 for latest addon features
-- Try re-exporting the PLY file
-- Check file path doesn't contain special characters
+**Symptoms**: No sparse reconstruction, empty output directory, or very few cameras
 
-**5. No GPU Available**
-- See [CPU Setup Guide](docs/CPU_SETUP.md) for CPU-only workflows
-- Consider using cloud GPU services for training step
-- Brush can work on CPU but will be slower
+**Common causes and solutions:**
+- **Insufficient overlap**: Ensure 70%+ overlap between consecutive frames
+- **Poor image quality**: Check for motion blur, low light, or overexposure
+- **Textureless scenes**: Add more visual features, avoid plain white walls
+- **Wrong camera model**: Try `SIMPLE_RADIAL` instead of `OPENCV`
 
-**6. Brush Issues**
-- Ensure GPU drivers are updated
-- Check COLMAP data loaded correctly
-- See [Brush Guide](docs/BRUSH_GUIDE.md) for detailed troubleshooting
+**Troubleshooting steps:**
+```bash
+# Try with lower quality first (faster debug)
+python scripts/run_colmap.py --images_dir ... --quality low
+
+# Use incremental mapper instead of global
+python scripts/run_colmap.py --images_dir ... # omit --use_global_mapper
+
+# Reduce feature count for difficult scenes
+python scripts/run_colmap.py --images_dir ... --quality medium
+```
+
+#### 3. Training Crashes (Out of Memory)
+
+**Error**: `CUDA out of memory` or process killed
+
+**Solutions:**
+- **Reduce resolution**: Use `--resolution 2` or `--resolution 4`
+- **Reduce frame count**: Use fewer images (150-200 instead of 300)
+- **Close other applications**: Free up GPU memory
+- **Monitor usage**: Watch `nvidia-smi` during training
+- **Use gradient checkpointing**: Some implementations support this
+
+#### 4. SkySplat Issues
+
+**Brush binary not executable (Linux):**
+```bash
+cd ~/.config/blender/5.2/scripts/addons/skysplat_blender/binaries/
+chmod +x brush_app_linux
+```
+
+**COLMAP not found:**
+- Ensure COLMAP is in PATH: `which colmap`
+- In SkySplat UI, manually specify COLMAP executable path
+
+**Addon not appearing:**
+- Ensure Blender 4.0+
+- Check addon is enabled in Preferences
+- Restart Blender after installation
+
+#### 5. uv Environment Issues
+
+**uv command not found:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.cargo/env
+```
+
+**Wrong Python version:**
+```bash
+# Force Python 3.11
+uv venv --python 3.11 --force
+source .venv/bin/activate
+python --version  # Should show 3.11.x
+```
+
+**Package conflicts:**
+```bash
+# Clean install
+rm -rf .venv
+uv venv --python 3.11
+source .venv/bin/activate
+uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+uv pip install -e .
+```
+
+#### 6. Blender Visualization Issues
+
+**PLY file won't import:**
+- Verify file exists and isn't corrupted
+- Check file size (should be > 1MB for typical scenes)
+- Ensure KIRI 3DGS addon is enabled
+- Try reimporting after restarting Blender
+
+**Rendering is slow:**
+- Reduce splat quality in 3DGS Render panel
+- Use smaller viewport resolution
+- Update GPU drivers
+
+**Splat looks wrong:**
+- Check scale - may need to adjust import scale
+- Verify training completed successfully
+- Ensure COLMAP reconstruction was good (check camera poses)
 
 ### Getting Help
 
 - **GitHub Issues**: [Report bugs or request features](https://github.com/arpm511/gaussian-splats/issues)
 - **Discussions**: [Ask questions and share results](https://github.com/arpm511/gaussian-splats/discussions)
+- **SkySplat**: [SkySplat Issues](https://github.com/kyjohnso/skysplat_blender/issues) for addon-specific questions
+- **COLMAP**: [COLMAP Discussions](https://github.com/colmap/colmap/discussions) for reconstruction issues
 
-## 🎓 Credits
+### Performance Tips
 
-This project builds upon amazing work from the research community:
+**Speed up reconstruction:**
+- Use `--use_global_mapper` (10-50x faster than incremental)
+- Reduce image resolution: `--quality medium` or `--quality low`
+- Use fewer frames (150-200 is often sufficient)
+- Enable GPU: ensure `--no_gpu` is NOT set
 
+**Speed up training:**
+- Start with 7000 iterations for preview
+- Use `--resolution 2` to downscale images  
+- Brush offers excellent GPU utilization and fast training
+- Monitor GPU with `nvidia-smi` - ensure high utilization
+
+**Optimize quality:**
+- More frames = better coverage (but diminishing returns after ~300)
+- Higher iterations = better detail (30000 is usually enough)
+- Full resolution training gives best results (but slower)
+- Good COLMAP reconstruction is critical - check sparse points before training
+
+---
+
+## Credits
+
+This project builds upon amazing work from the research and open-source community:
+
+### Core Technologies
 - **Gaussian Splatting**: [3D Gaussian Splatting for Real-Time Radiance Field Rendering](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/) by Inria
-- **COLMAP**: [Structure-from-Motion and Multi-View Stereo](https://colmap.github.io/)
-- **GLOMAP**: [Fast and Robust Structure-from-Motion](https://github.com/colmap/glomap) by COLMAP team
-- **Brush**: [Interactive Gaussian Splatting Training](https://github.com/ArthurBrussee/brush) by Arthur Brussee
-- **Tutorial Reference**: [nicko16's YouTube Tutorial](https://www.youtube.com/watch?v=A1T9uJtq0cI)
-- **Blender Add-on**: [Kiri 3DGS Render](https://github.com/KIRI-Innovation/kiri-3dgs-blender-addon)
+- **COLMAP**: [Structure-from-Motion and Multi-View Stereo](https://colmap.github.io/) - Essential SfM pipeline
+- **GLOMAP** (now integrated): [Global Structure-from-Motion Revisited](https://github.com/colmap/glomap) - Fast global mapper
+- **Brush**: [Interactive Gaussian Splatting](https://github.com/ArthurBrussee/brush) by Arthur Brussee
+- **SkySplat**: [All-in-one Blender Pipeline](https://github.com/kyjohnso/skysplat_blender) by Kyle Johnson
+
+### Visualization
+- **KIRI 3DGS Render**: [Blender Gaussian Splat Renderer](https://github.com/Kiri-Innovation/3dgs-render-blender-addon)
+- **Blender**: [Open Source 3D Creation Suite](https://www.blender.org/)
+
+### Inspiration & Learning Resources
+- [nicko16's YouTube Tutorial](https://www.youtube.com/watch?v=A1T9uJtq0cI) - Excellent walkthrough
+- [RedShot AI 3DGS Tutorial](https://www.reshot.ai/3d-gaussian-splatting) - Comprehensive guide
+
+### Citations
+
+If you use this repository or Gaussian Splatting in your research, please cite:
+
+```bibtex
+@inproceedings{kerbl3Dgaussians,
+  title={3D Gaussian Splatting for Real-Time Radiance Field Rendering},
+  author={Kerbl, Bernhard and Kopanas, Georgios and Leimk{\"u}hler, Thomas and Drettakis, George},
+  booktitle={ACM Transactions on Graphics},
+  volume={42},
+  number={4},
+  year={2023}
+}
+
+@inproceedings{schoenberger2016sfm,
+  title={Structure-from-Motion Revisited},
+  author={Sch\"{o}nberger, Johannes Lutz and Frahm, Jan-Michael},
+  booktitle={CVPR},
+  year={2016}
+}
+
+@inproceedings{pan2024glomap,
+  title={{Global Structure-from-Motion Revisited}},
+  author={Pan, Linfei and Barath, Daniel and Pollefeys, Marc and Sch\"{o}nberger, Johannes Lutz},
+  booktitle={ECCV},
+  year={2024}
+}
+```
+
+---
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Showcase
-
-<!-- TODO: Add showcase section with example renders -->
-
-If you create something cool with this pipeline, please share it! Open a PR to add your work to our showcase.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-## Contact
-
-<!-- TODO: Add your contact information -->
-- **GitHub**: [@arpm511](https://github.com/arpm511)
-- **Email**: arpm511@gmail.com
+**Note**: This repository contains educational scripts and documentation. The actual reconstruction and training tools (COLMAP, Brush, gaussian-splatting) have their own licenses:
+- COLMAP: BSD License
+- Brush: Apache 2.0 License
+- gaussian-splatting: Inria and Max Planck Gesellschaft license
 
 ---
 
-**⭐ If you find this project helpful, please consider giving it a star!**
+## Contact & Support
+
+**Maintainer**: [@arpm511](https://github.com/arpm511)  
+**Email**: arpm511@gmail.com
+
+### Getting Help
+
+- **Documentation**: Read this README and docs/ folder first
+- **Discussions**: [GitHub Discussions](https://github.com/arpm511/gaussian-splats/discussions) for questions
+- **Bug Reports**: [GitHub Issues](https://github.com/arpm511/gaussian-splats/issues) for bugs
+- **Show Support**: Star the repository if you find it helpful!
+
+---
+
+## Acknowledgments
+
+This repository was created as an educational resource to lower the barrier to entry for Gaussian Splatting. The goal is to help students, researchers, and artists quickly get started without spending days on environment setup.
+
+Special thanks to:
+- The COLMAP team for reliable SfM software
+- Arthur Brussee for the excellent Brush training tool
+- Kyle Johnson for the SkySplat Blender addon
+- The Inria GraphDeco team for pioneering 3D Gaussian Splatting
+- The open-source community for continuous improvements
+
+**Your feedback helps improve this resource!** If you found issues or have suggestions, please open an issue or discussion.
+
+---
+
+<div align="center">
+
+**⭐ If this repository helped you, please consider giving it a star! ⭐**
+
+*Making Gaussian Splatting accessible to everyone, one splat at a time.*
+
+</div>

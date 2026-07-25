@@ -1,8 +1,9 @@
 """
-COLMAP + GLOMAP Processing Script
+COLMAP Processing Script (with Global Mapper support)
 
-Runs Structure-from-Motion (SfM) using COLMAP for feature extraction/matching
-and GLOMAP for faster sparse reconstruction.
+Runs Structure-from-Motion (SfM) using COLMAP 4.0+ which includes:
+- Feature extraction and matching
+- Global mapper (faster, was GLOMAP) or incremental mapper (traditional)
 """
 
 import os
@@ -28,18 +29,18 @@ def run_colmap(
     camera_model="OPENCV",
     quality="high",
     gpu=True,
-    use_glomap=True
+    use_global_mapper=True
 ):
     """
-    Run COLMAP + GLOMAP pipeline on images.
+    Run COLMAP pipeline on images with optional global mapper.
     
     Args:
         images_dir: Directory containing input images
         output_dir: Directory for COLMAP output
-        camera_model: Camera model (OPENCV, PINHOLE, RADIAL, etc.)
+        camera_model: Camera model (OPENCV, PINHOLE, SIMPLE_RADIAL, etc.)
         quality: Processing quality (high, medium, low)
         gpu: Use GPU acceleration
-        use_glomap: Use GLOMAP for reconstruction (faster) instead of COLMAP mapper
+        use_global_mapper: Use global mapper (faster, was GLOMAP) vs incremental
     """
     images_dir = Path(images_dir)
     output_dir = Path(output_dir)
@@ -101,15 +102,16 @@ def run_colmap(
     
     subprocess.run(_run_with_display(matching_cmd), check=True)
     
-    # Sparse reconstruction - use GLOMAP or COLMAP mapper
-    if use_glomap and shutil.which("glomap"):
+    # Sparse reconstruction - use global mapper (fast) or incremental (robust)
+    if use_global_mapper:
         print("\n" + "=" * 60)
-        print("GLOMAP Sparse Reconstruction (Faster)")
+        print("COLMAP Global Mapper (Fast, was GLOMAP)")
         print("=" * 60)
+        print("Using global SfM - 10-50x faster than incremental")
         
-        # GLOMAP mapper (much faster than COLMAP)
+        # COLMAP 4.0+ global mapper (was GLOMAP)
         mapper_cmd = [
-            "glomap", "mapper",
+            "colmap", "global_mapper",
             "--database_path", str(database_path),
             "--image_path", str(images_dir),
             "--output_path", str(sparse_dir),
@@ -117,14 +119,12 @@ def run_colmap(
         
         subprocess.run(_run_with_display(mapper_cmd), check=True)
     else:
-        if use_glomap:
-            print("\nWarning: GLOMAP not found, falling back to COLMAP mapper")
-        
         print("\n" + "=" * 60)
-        print("COLMAP Sparse Reconstruction")
+        print("COLMAP Incremental Mapper (Robust)")
         print("=" * 60)
+        print("Using incremental SfM - slower but very reliable")
         
-        # COLMAP mapper (slower but reliable fallback)
+        # COLMAP incremental mapper (traditional)
         mapper_cmd = [
             "colmap", "mapper",
             "--database_path", str(database_path),
@@ -167,9 +167,15 @@ def main():
         help="Output directory for COLMAP data"
     )
     parser.add_argument(
-        "--no_glomap",
+        "--use_global_mapper",
         action="store_true",
-        help="Use COLMAP mapper instead of GLOMAP (slower but more compatible)"
+        default=True,
+        help="Use global mapper (faster, was GLOMAP) instead of incremental"
+    )
+    parser.add_argument(
+        "--no_global_mapper",
+        action="store_true",
+        help="Use incremental mapper instead of global (slower but more robust)"
     )
     parser.add_argument(
         "--camera_model",
@@ -196,14 +202,14 @@ def main():
     if not Path(args.images_dir).exists():
         raise FileNotFoundError(f"Images directory not found: {args.images_dir}")
     
-    # Run COLMAP + GLOMAP
+    # Run COLMAP reconstruction
     run_colmap(
         args.images_dir,
         args.output_dir,
         camera_model=args.camera_model,
         quality=args.quality,
         gpu=not args.no_gpu,
-        use_glomap=not args.no_glomap
+        use_global_mapper=args.use_global_mapper and not args.no_global_mapper
     )
 
 
