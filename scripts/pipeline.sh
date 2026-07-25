@@ -30,11 +30,11 @@ if [ ! -f "$VIDEO_PATH" ]; then
 fi
 
 # Setup directories
-FRAMES_DIR="data/processed/frames/${PROJECT_NAME}"
 COLMAP_DIR="data/processed/colmap/${PROJECT_NAME}"
+FRAMES_DIR="${COLMAP_DIR}/images"
 MODEL_DIR="data/output/splats/${PROJECT_NAME}"
 
-mkdir -p "$FRAMES_DIR" "$COLMAP_DIR" "$MODEL_DIR"
+mkdir -p "$FRAMES_DIR" "$MODEL_DIR"
 
 # Step 1: Extract frames from video
 echo ""
@@ -61,10 +61,9 @@ echo "Step 3/3: Training Gaussian Splatting model..."
 # Check if Brush is available
 if command -v brush_app &> /dev/null; then
     echo "Using Brush for training..."
-    brush_app train \
-        --data "$COLMAP_DIR" \
-        --output "$MODEL_DIR" \
-        --iterations 30000
+    brush_app RUST_BACKTRACE=1 "$COLMAP_DIR" \
+        --export-path "$MODEL_DIR" \
+        --total-steps 30000
 else
     # Fall back to python training script
     echo "Using Python training script..."
