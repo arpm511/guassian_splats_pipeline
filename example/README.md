@@ -179,7 +179,7 @@ To reproduce this example with your own system:
 3. **Run the pipeline** following the commands in this README
 4. **Compare your results** with the settings and times documented here
 
-For detailed setup instructions, see the main [README.md](../README.md) and [IMPLEMENTATION_GUIDE.md](../IMPLEMENTATION_GUIDE.md).
+For detailed setup instructions, see the main [README.md](../README.md)
 
 ## Credits
 

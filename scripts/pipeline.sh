@@ -61,9 +61,10 @@ echo "Step 3/3: Training Gaussian Splatting model..."
 # Check if Brush is available
 if command -v brush_app &> /dev/null; then
     echo "Using Brush for training..."
-    brush_app RUST_BACKTRACE=1 "$COLMAP_DIR" \
+    RUST_BACKTRACE=1 brush_app \
         --export-path "$MODEL_DIR" \
-        --total-steps 30000
+        --total-steps 30000 \
+        "$COLMAP_DIR"
 else
     # Fall back to python training script
     echo "Using Python training script..."

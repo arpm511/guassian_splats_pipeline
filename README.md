@@ -263,7 +263,7 @@ docker run --rm --gpus all nvidia/cuda:12.1.0-base-ubuntu22.04 nvidia-smi
 
 **Build and run:**
 ```bash
-git clone https://github.com/arpm511/gaussian-splats.git
+git clone https://github.com/arpm511/guassian_splats_pipeline.git
 cd gaussian-splats
 docker-compose build
 docker-compose up -d
@@ -336,7 +336,7 @@ uv pip install torch torchvision torchaudio --index-url https://download.pytorch
 uv pip install -e .
 
 # Verify PyTorch CUDA
-python3 -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
+uv run python3 -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
 ```
 
 #### Step 3: Install Brush for Training
@@ -347,6 +347,9 @@ Brush is a fast, modern Gaussian Splatting trainer with both GUI and CLI:
 # Option 1: Download pre-built binaries (easiest)
 # Visit https://github.com/ArthurBrussee/brush/releases
 # Download for your platform and make executable:
+tar -xf brush-app-*.tar.xz
+mv brush-app-* brush_app
+cd brush_app
 chmod +x brush_app
 sudo mv brush_app /usr/local/bin/  # Or keep in project directory
 

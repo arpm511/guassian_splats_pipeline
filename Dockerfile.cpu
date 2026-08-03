@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     cmake
 
 # Install system dependencies
+RUN add-apt-repository universe
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
@@ -53,15 +54,6 @@ RUN git clone https://github.com/colmap/colmap.git /tmp/colmap && \
     make -j$(nproc) && \
     make install && \
     rm -rf /tmp/colmap
-
-# Install GLOMAP (CPU-only build)
-RUN git clone https://github.com/colmap/glomap.git /tmp/glomap && \
-    cd /tmp/glomap && \
-    mkdir build && cd build && \
-    cmake .. -DCUDA_ENABLED=OFF && \
-    make -j$(nproc) && \
-    make install && \
-    rm -rf /tmp/glomap
 
 # Set up Python environment
 WORKDIR /workspace
